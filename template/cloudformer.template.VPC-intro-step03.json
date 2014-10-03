@@ -37,15 +37,6 @@
       "Properties": {
       }
     },
-    "doptcda2b3af": {
-      "Type": "AWS::EC2::DHCPOptions",
-      "Properties": {
-        "DomainName": "ap-northeast-1.compute.internal",
-        "DomainNameServers": [
-          "AmazonProvidedDNS"
-        ]
-      }
-    },
     "rtb1330c376": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
@@ -59,6 +50,41 @@
           }
         ]
       }
+    },
+    "gw4": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc3ecd3b5b"
+        },
+        "InternetGatewayId": {
+          "Ref": "igw7a869c18"
+        }
+      }
+    },
+    "subnetroute4": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb1330c376"
+        },
+        "SubnetId": {
+          "Ref": "subnetdebf49a9"
+        }
+      }
+    },
+    "route3": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "rtb1330c376"
+        },
+        "GatewayId": {
+          "Ref": "igw7a869c18"
+        }
+      },
+      "DependsOn": "gw4"
     },
     "instanceia56e2ebc": {
       "Type": "AWS::EC2::Instance",
@@ -101,7 +127,7 @@
     "sgVPCintrosgWEBSG1G90L9V7J9MPB": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "launch-wizard-1 created 2014-10-02T15:14:33.700+09:00",
+        "GroupDescription": "WEB-SG",
         "VpcId": {
           "Ref": "vpc3ecd3b5b"
         },
@@ -125,52 +151,6 @@
             "CidrIp": "0.0.0.0/0"
           }
         ]
-      }
-    },
-    "gw4": {
-      "Type": "AWS::EC2::VPCGatewayAttachment",
-      "Properties": {
-        "VpcId": {
-          "Ref": "vpc3ecd3b5b"
-        },
-        "InternetGatewayId": {
-          "Ref": "igw7a869c18"
-        }
-      }
-    },
-    "subnetroute4": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "RouteTableId": {
-          "Ref": "rtb1330c376"
-        },
-        "SubnetId": {
-          "Ref": "subnetdebf49a9"
-        }
-      }
-    },
-    "route3": {
-      "Type": "AWS::EC2::Route",
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": {
-          "Ref": "rtb1330c376"
-        },
-        "GatewayId": {
-          "Ref": "igw7a869c18"
-        }
-      },
-      "DependsOn": "gw4"
-    },
-    "dchpassoc4": {
-      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
-      "Properties": {
-        "VpcId": {
-          "Ref": "vpc3ecd3b5b"
-        },
-        "DhcpOptionsId": {
-          "Ref": "doptcda2b3af"
-        }
       }
     }
   },

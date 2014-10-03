@@ -165,9 +165,136 @@ EC2インスタンスにログインするためのキーペアを作成して�
 
 ![Step02](https://farm3.staticflickr.com/2949/15238346547_ee71cbd547.jpg)
 
-## <a name="3">プライベートサブネットを構築する</a>
-## <a name="4">NATサーバーを構築する</a>
-## <a name="5">Webサーバーをセットアップする</a>
+### インスタンス
+
+```json
+"instanceif16929e8": {
+  "Type": "AWS::EC2::Instance",
+  "Properties": {
+    "DisableApiTermination": "FALSE",
+    "ImageId": "ami-35072834",
+    "InstanceType": "t2.micro",
+    "KeyName": "my-key",
+    "Monitoring": "false",
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "Webサーバー"
+      }
+    ],
+    "NetworkInterfaces": [
+      {
+        "DeleteOnTermination": "true",
+        "Description": "Primary network interface",
+        "DeviceIndex": 0,
+        "SubnetId": {
+          "Ref": "subnet2eb14759"
+        },
+        "PrivateIpAddresses": [
+          {
+            "PrivateIpAddress": "10.0.1.10",
+            "Primary": "true"
+          }
+        ],
+        "GroupSet": [
+          {
+            "Ref": "sgWEBSG"
+          }
+        ],
+        "AssociatePublicIpAddress": "true"
+      }
+    ]
+  }
+},
+```
+
+### セキュリティグループ
+
+```json
+"sgWEBSG": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "WEB-SG",
+    "VpcId": {
+      "Ref": "vpc9bcf39fe"
+    },
+    "SecurityGroupIngress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ],
+    "SecurityGroupEgress": [
+      {
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ]
+  }
+}
+```
+
+## <a name="3">Webサーバーをセットアップする</a>
+
+_template/cloudformer.template.VPC-intro-step03.json_
+
+### セキュリティグループ
+```json
+"sgVPCintrosgWEBSG1G90L9V7J9MPB": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "WEB-SG",
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "SecurityGroupIngress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ],
+    "SecurityGroupEgress": [
+      {
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ]
+  }
+}
+},
+```
+
+### Webサーバーインストール
+
+接続先を確認
+
+![011](https://farm3.staticflickr.com/2942/15425271672_2fb1131b8c.jpg)
+
+インスタンス作成に使った秘密鍵を手元に用意する
+
+```bash
+$ ssh -i my-key.pem ec2-user@54.64.226.210
+$ sudo yum -y install httpd
+$ sudo service httpd start
+$ sudo chkconfig httpd on
+```
+
+_http://54.64.226.210/_にアクセスして稼働を確認する。
+
+![012](https://farm6.staticflickr.com/5598/15238934590_b9e47bcbb2.jpg)
+
+## <a name="4">プライベートサブネットを構築する</a>
+## <a name="5">NATサーバーを構築する</a>
 ## <a name="6">DBサーバーをセットアップする</a>
 
 # 参照
