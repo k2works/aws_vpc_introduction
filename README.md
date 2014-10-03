@@ -441,6 +441,137 @@ _template/cloudformer.template.VPC-intro-step04.json_
 ```
 
 ## <a name="5">NATサーバーを構築する</a>
+
+### ネットワーク図
+
+![Step05](https://farm3.staticflickr.com/2942/15402967226_791552cd21.jpg)
+
+_template/cloudformer.template.VPC-intro-step05.json_
+
+### プライベートルートテーブル
+
+```json
+"rtb1430c371": {
+  "Type": "AWS::EC2::RouteTable",
+  "Properties": {
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "プライベートルートテーブル"
+      }
+    ]
+  }
+},
+・・・
+"route5": {
+  "Type": "AWS::EC2::Route",
+  "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "RouteTableId": {
+      "Ref": "rtb1430c371"
+    },
+    "InstanceId": {
+      "Ref": "instanceie680c0ff"
+    }
+  }
+},
+```
+
+### NATインスタンス
+
+```json
+"instanceie680c0ff": {
+  "Type": "AWS::EC2::Instance",
+  "Properties": {
+    "DisableApiTermination": "FALSE",
+    "ImageId": "ami-31c29e30",
+    "InstanceType": "t1.micro",
+    "KernelId": "aki-176bf516",
+    "KeyName": "my-key",
+    "Monitoring": "false",
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "NATサーバ"
+      }
+    ],
+    "NetworkInterfaces": [
+      {
+        "DeleteOnTermination": "true",
+        "Description": "Primary network interface",
+        "DeviceIndex": 0,
+        "SubnetId": {
+          "Ref": "subnetdebf49a9"
+        },
+        "PrivateIpAddresses": [
+          {
+            "PrivateIpAddress": "10.0.1.20",
+            "Primary": "true"
+          }
+        ],
+        "GroupSet": [
+          {
+            "Ref": "sgNATSG"
+          }
+        ],
+        "AssociatePublicIpAddress": "true"
+      }
+    ]
+  }
+},
+```
+
+### セキュリティグループ
+
+```json
+"sgNATSG": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "NAT Security Group",
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "SecurityGroupIngress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "10.0.1.10/32"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "443",
+        "ToPort": "443",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ],
+    "SecurityGroupEgress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "443",
+        "ToPort": "443",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ]
+  }
+},
+```
+
 ## <a name="6">DBサーバーをセットアップする</a>
 
 # 参照
