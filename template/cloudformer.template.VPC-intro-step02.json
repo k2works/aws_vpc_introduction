@@ -37,15 +37,6 @@
       "Properties": {
       }
     },
-    "dopt3ba2b359": {
-      "Type": "AWS::EC2::DHCPOptions",
-      "Properties": {
-        "DomainName": "ap-northeast-1.compute.internal",
-        "DomainNameServers": [
-          "AmazonProvidedDNS"
-        ]
-      }
-    },
     "acl211fef44": {
       "Type": "AWS::EC2::NetworkAcl",
       "Properties": {
@@ -117,7 +108,7 @@
     "sgWEBSG": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupDescription": "launch-wizard-1 created 2014-10-02T15:14:33.700+09:00",
+        "GroupDescription": "WEB-SG",
         "VpcId": {
           "Ref": "vpc9bcf39fe"
         },
@@ -207,17 +198,6 @@
         }
       },
       "DependsOn": "gw3"
-    },
-    "dchpassoc3": {
-      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
-      "Properties": {
-        "VpcId": {
-          "Ref": "vpc9bcf39fe"
-        },
-        "DhcpOptionsId": {
-          "Ref": "dopt3ba2b359"
-        }
-      }
     }
   },
   "Description": "VPC-intro-step02"

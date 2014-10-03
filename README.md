@@ -154,6 +154,17 @@ EC2インスタンスにログインするためのキーペアを作成して�
 
 
 ## <a name="2">サーバーを構築する</a>
+
+### AWS CloudFormation更新
+
+![009](https://farm3.staticflickr.com/2948/15401841396_89fb4c28ab.jpg)
+
+![010](https://farm3.staticflickr.com/2945/15424891045_c67d29c880.jpg)
+
+### ネットワーク図
+
+![Step02](https://farm3.staticflickr.com/2949/15238346547_ee71cbd547.jpg)
+
 ## <a name="3">プライベートサブネットを構築する</a>
 ## <a name="4">NATサーバーを構築する</a>
 ## <a name="5">Webサーバーをセットアップする</a>
