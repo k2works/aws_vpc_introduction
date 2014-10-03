@@ -165,7 +165,7 @@ EC2インスタンスにログインするためのキーペアを作成して�
 
 ![Step02](https://farm3.staticflickr.com/2949/15238346547_ee71cbd547.jpg)
 
-### インスタンス
+### Webサーバーインスタンス
 
 ```json
 "instanceif16929e8": {
@@ -294,6 +294,152 @@ _http://54.64.226.210/_にアクセスして稼働を確認する。
 ![012](https://farm6.staticflickr.com/5598/15238934590_b9e47bcbb2.jpg)
 
 ## <a name="4">プライベートサブネットを構築する</a>
+
+### ネットワーク図
+
+![Step04](https://farm3.staticflickr.com/2944/15402683306_afbcdc1156.jpg)
+
+_template/cloudformer.template.VPC-intro-step04.json_
+
+### プライベートサブネット
+
+```json
+"subnetbbbd4bcc": {
+  "Type": "AWS::EC2::Subnet",
+  "Properties": {
+    "CidrBlock": "10.0.2.0/24",
+    "AvailabilityZone": "ap-northeast-1a",
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "プライベートサブネット"
+      }
+    ]
+  }
+},
+```
+
+### DBサーバーインスタンス
+
+```json
+"instancei4a783853": {
+  "Type": "AWS::EC2::Instance",
+  "Properties": {
+    "DisableApiTermination": "FALSE",
+    "ImageId": "ami-35072834",
+    "InstanceType": "t2.micro",
+    "KeyName": "my-key",
+    "Monitoring": "false",
+    "Tags": [
+      {
+        "Key": "Name",
+        "Value": "DBサーバ"
+      }
+    ],
+    "NetworkInterfaces": [
+      {
+        "DeleteOnTermination": "true",
+        "Description": "Primary network interface",
+        "DeviceIndex": 0,
+        "SubnetId": {
+          "Ref": "subnetbbbd4bcc"
+        },
+        "PrivateIpAddresses": [
+          {
+            "PrivateIpAddress": "10.0.2.10",
+            "Primary": "true"
+          }
+        ],
+        "GroupSet": [
+          {
+            "Ref": "sgDBSG"
+          }
+        ]
+      }
+    ]
+  }
+},
+```
+
+### セキュリティグループ
+
+```json
+"sgDBSG": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "WEB-SG",
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "SecurityGroupIngress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "3306",
+        "ToPort": "3306",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "icmp",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ],
+    "SecurityGroupEgress": [
+      {
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ]
+  }
+},
+"sgVPCintrosgWEBSG1G90L9V7J9MPB": {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription": "DB-SG",
+    "VpcId": {
+      "Ref": "vpc3ecd3b5b"
+    },
+    "SecurityGroupIngress": [
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      },
+      {
+        "IpProtocol": "icmp",
+        "FromPort": "-1",
+        "ToPort": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ],
+    "SecurityGroupEgress": [
+      {
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    ]
+  }
+}
+},
+```
+
 ## <a name="5">NATサーバーを構築する</a>
 ## <a name="6">DBサーバーをセットアップする</a>
 
