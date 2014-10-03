@@ -1,0 +1,111 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpc2bcf394e": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "VPC領域"
+          }
+        ]
+      }
+    },
+    "subnet4fb04638": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.0.1.0/24",
+        "AvailabilityZone": "ap-northeast-1a",
+        "VpcId": {
+          "Ref": "vpc2bcf394e"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "パブリックサブネット"
+          }
+        ]
+      }
+    },
+    "igwdf809abd": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+      }
+    },
+    "dopt4ea2b32c": {
+      "Type": "AWS::EC2::DHCPOptions",
+      "Properties": {
+        "DomainName": "ap-northeast-1.compute.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
+        ]
+      }
+    },
+    "rtb3932c15c": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc2bcf394e"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "パブリックルートテーブル"
+          }
+        ]
+      }
+    },
+    "gw2": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc2bcf394e"
+        },
+        "InternetGatewayId": {
+          "Ref": "igwdf809abd"
+        }
+      }
+    },
+    "subnetroute1": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb3932c15c"
+        },
+        "SubnetId": {
+          "Ref": "subnet4fb04638"
+        }
+      }
+    },
+    "route1": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": {
+          "Ref": "rtb3932c15c"
+        },
+        "GatewayId": {
+          "Ref": "igwdf809abd"
+        }
+      },
+      "DependsOn": "gw2"
+    },
+    "dchpassoc2": {
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc2bcf394e"
+        },
+        "DhcpOptionsId": {
+          "Ref": "dopt4ea2b32c"
+        }
+      }
+    }
+  },
+  "Description": "VPC-intro-step01"
+}
