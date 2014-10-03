@@ -6,17 +6,18 @@ AWS Virtual Private Cloudを使えるようにする。
 # 前提
 | ソフトウェア     | バージョン    | 備考         |
 |:---------------|:-------------|:------------|
-| OS X           |10.8.5        |             |
+| AWS CloudFormation  |API Version 2010-05-15        |             |
+| Amazon Virtual Private Cloud  |API Version 2014-02-01       |             |
 |           　　　|        |             |
 
 # 構成
 + [セットアップ](#0)
 + [ネットワークを構築する](#1)
 + [サーバーを構築する](#2)
-+ [プライベートサブネットを構築する](#3)
-+ [NATサーバーを構築する](#4)
-+ [Webサーバーをセットアップする](#5)
-+ [DBサーバーをセットアップする](#6)
++ [Webサーバーをセットアップする](#3)
++ [プライベートサブネットを構築する](#4)
++ [NATサーバーを構築する](#5)
++ [DBを用いたブログシステムの構築](#6)
 
 # 詳細
 ## <a name="0">セットアップ</a>
@@ -440,11 +441,23 @@ _template/cloudformer.template.VPC-intro-step04.json_
 },
 ```
 
+### Webサーバー経由でDBサーバーにアクセスできるようにする
+
+```bash
+$ scp -i my-key.pem my-key.pem ec2-user@54.64.226.223:~
+$ ssh -i my-key.pem ec2-user@54.64.226.223
+$ ssh -i my-key.pem ec2-user@10.0.2.10
+```
+
 ## <a name="5">NATサーバーを構築する</a>
 
 ### ネットワーク図
 
 ![Step05](https://farm3.staticflickr.com/2942/15402967226_791552cd21.jpg)
+
+### NATサーバーの送信元／送信先のチェックを無効にする
+
+![013](https://farm3.staticflickr.com/2944/15426172092_b94348b2e2.jpg)
 
 _template/cloudformer.template.VPC-intro-step05.json_
 
@@ -572,7 +585,69 @@ _template/cloudformer.template.VPC-intro-step05.json_
 },
 ```
 
-## <a name="6">DBサーバーをセットアップする</a>
+プライベートルートテーブルの中身
+
+| ディスティネーション（宛先）     | ターゲット    |
+|:---------------|:-------------|
+| 10.0.0.0/16    |local         |
+|  0.0.0.0/0　　　 |NATサーバー     |
+
+## <a name="6">DBを用いたブログシステムの構築</a>
+
+### ネットワーク図
+
+![Step06](https://farm4.staticflickr.com/3935/15422950271_e2ae0b9004.jpg)
+
+### DBセットアップ
+
+```bash
+$ ssh -i my-key.pem ec2-user@54.64.226.223
+$ ssh -i my-key.pem ec2-user@10.0.2.10
+$ sudo yum -y install mysql-server
+$ sudo service mysqld start
+$ mysqladmin -u root password
+New password:
+Confirm new password:
+$ mysql -u root -p
+mysql> CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+mysql> grant all on wordpress.* to wordpress@"%" identified by 'wordpresspasswd';
+mysql> flush privileges;
+mysql> exit;
+$ sudo /sbin/chkconfig mysqld on
+$ exit
+```
+
+### WordPressセットアップ
+
+```bash
+$ sudo yum -y install php php-mysql php-mbstring
+$ sudo yum -y install mysql
+$ mysql -h 10.0.2.10 -u wordpress -pwordpresspasswd
+mysql> exit;
+$ cd ~
+$ wget http://ja.wordpress.org/latest-ja.tar.gz
+$ tar xzvf latest-ja.tar.gz
+$ cd wordpress/
+$ sudo cp -r * /var/www/html/
+$ sudo chown apache:apache /var/www/html -R
+$ sudo service httpd restart
+```
+
+_http://54.64.226.223/_にアクセスする
+
+![014](https://farm4.staticflickr.com/3929/15403461286_b79dd02677.jpg)
+
+![015](https://farm3.staticflickr.com/2944/15239971017_2925806d02.jpg)
+
+![016](https://farm4.staticflickr.com/3933/15239971107_c57129e27f.jpg)
+
+![017](https://farm6.staticflickr.com/5597/15423339061_d893b04a50.jpg)
+
+![018](https://farm4.staticflickr.com/3930/15239971117_3c913f73d3.jpg)
+
+![019](https://farm4.staticflickr.com/3936/15239970927_c0a57b3efa.jpg)
+
+![020](https://farm3.staticflickr.com/2944/15403461306_e156776cf2.jpg)
 
 # 参照
 

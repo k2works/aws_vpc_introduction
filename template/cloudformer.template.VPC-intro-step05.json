@@ -103,6 +103,17 @@
         }
       }
     },
+    "subnetroute9": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "rtb1430c371"
+        },
+        "SubnetId": {
+          "Ref": "subnetbbbd4bcc"
+        }
+      }
+    },
     "route5": {
       "Type": "AWS::EC2::Route",
       "Properties": {
